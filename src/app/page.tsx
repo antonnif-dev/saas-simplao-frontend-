@@ -54,18 +54,14 @@ export default function LoginPage() {
 
         const { protocol, hostname, port } = window.location;
 
-        // Remove subdomínio atual (se existir)
-        const baseDomain = hostname
-          .split('.')
-          .slice(-2)
-          .join('.');
+        if (hostname.includes("localhost")) {
+          window.location.href = `${protocol}//${tenantId}.localhost:${port}`;
+          return;
+        }
 
-        const newUrl =
-          hostname.includes('localhost')
-            ? `${protocol}//${tenantId}.localhost:${port}`
-            : `${protocol}//${tenantId}.${baseDomain}`;
-
-        window.location.href = `${window.location.origin}/sites/${tenantId}`;
+        // PROD/VERCEL: modo teste por path
+        window.location.href = `${protocol}//${hostname}/sites/${tenantId}`;
+        return;
       }
     } catch (error) {
       alert("Erro ao entrar. Verifique suas credenciais.");
