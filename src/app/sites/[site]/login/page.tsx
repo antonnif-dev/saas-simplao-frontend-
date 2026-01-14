@@ -54,7 +54,8 @@ export default function TenantLoginPage() {
 
       const userData = userDoc.data();
       if (userData.tenantId === site) {
-        window.location.href = "/";
+        //window.location.href = "/";
+        window.location.href = `/sites/${tenantId}`;
       } else {
         alert("Acesso negado: Este usuário não pertence a esta unidade.");
         await auth.signOut();
