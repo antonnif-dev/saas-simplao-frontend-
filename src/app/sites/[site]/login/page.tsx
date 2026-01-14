@@ -53,13 +53,16 @@ export default function TenantLoginPage() {
       }
 
       const userData = userDoc.data();
-      if (userData.tenantId === site) {
-        //window.location.href = "/";
-        window.location.href = `/sites/${tenantId}`;
-      } else {
+      const tenantId = userData.tenantId;
+
+      if (site && tenantId !== site) {
         alert("Acesso negado: Este usuário não pertence a esta unidade.");
         await auth.signOut();
+        return;
       }
+
+      window.location.href = `/sites/${tenantId}`;
+
     } catch (error) {
       alert("E-mail ou senha incorretos.");
     } finally {
