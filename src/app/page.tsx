@@ -65,7 +65,7 @@ export default function LoginPage() {
             ? `${protocol}//${tenantId}.localhost:${port}`
             : `${protocol}//${tenantId}.${baseDomain}`;
 
-        window.location.href = newUrl;
+        window.location.href = `${window.location.origin}/sites/${tenantId}`;
       }
     } catch (error) {
       alert("Erro ao entrar. Verifique suas credenciais.");
