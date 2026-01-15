@@ -22,13 +22,6 @@ export default function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  if (
-    domain.endsWith(".vercel.app") &&
-    domain.split(".").length === 3 // ex: simplao-frontend.vercel.app
-  ) {
-    return NextResponse.next();
-  }
-
   if (domain.endsWith(".localhost")) {
     const tenant = domain.replace(".localhost", "");
     const targetPath = `/sites/${tenant}${pathname}`;
@@ -42,8 +35,11 @@ export default function middleware(req: NextRequest) {
     return NextResponse.rewrite(new URL(targetPath, req.url));
   }
 
-  const currentHost = domain.replace(".localhost", "");
-  const targetPath = `/sites/${currentHost}${url.pathname}`;
-
-  return NextResponse.next();
+  if (domain.endsWith(".vercel.app") && domain.split(".").length === 3) {
+    const tenant = req.cookies.get("tenant")?.value;
+    if (tenant) {
+      const targetPath = `/sites/${tenant}${pathname}`;
+      return NextResponse.rewrite(new URL(targetPath, req.url));
+    }
+  }
 }

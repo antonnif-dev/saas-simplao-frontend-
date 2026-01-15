@@ -61,8 +61,10 @@ export default function TenantLoginPage() {
         return;
       }
 
-      window.location.href = `/sites/${tenantId}`;
+      const isLocal = window.location.hostname.includes("localhost");
+      document.cookie = `tenant=${tenantId}; Path=/; SameSite=Lax${isLocal ? "" : "; Secure"}`;
 
+      window.location.href = `/sites/${tenantId}`;
     } catch (error) {
       alert("E-mail ou senha incorretos.");
     } finally {

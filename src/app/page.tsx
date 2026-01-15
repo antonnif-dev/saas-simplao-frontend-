@@ -54,12 +54,14 @@ export default function LoginPage() {
 
         const { protocol, hostname, port } = window.location;
 
-        if (hostname.includes("localhost")) {
+        const isLocal = hostname.includes("localhost");
+        document.cookie = `tenant=${tenantId}; Path=/; SameSite=Lax${isLocal ? "" : "; Secure"}`;
+
+        if (isLocal) {
           window.location.href = `${protocol}//${tenantId}.localhost:${port}`;
           return;
         }
 
-        // PROD/VERCEL: modo teste por path
         window.location.href = `${protocol}//${hostname}/sites/${tenantId}`;
         return;
       }
