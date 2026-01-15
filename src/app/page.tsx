@@ -1,25 +1,26 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { auth, db } from "@/lib/firebase";
-import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+//import { auth, db } from "@/lib/firebase";
+//import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+//import { doc, getDoc } from "firebase/firestore";
+import Link from "next/link";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  //const [email, setEmail] = useState('');
+  //const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    // Remova a referência a 'site' aqui dentro
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) {
-        console.log("Usuário detectado na raiz.");
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
+  /*
+    useEffect(() => {
+      // Remova a referência a 'site' aqui dentro
+      const unsubscribe = auth.onAuthStateChanged((user) => {
+        if (user) {
+          console.log("Usuário detectado na raiz.");
+        }
+      });
+      return () => unsubscribe();
+    }, []);
+  */
   /* Somente localhost:3000 funcionando
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,8 +88,11 @@ export default function LoginPage() {
           </p>
         </div>
 
+
+
         {/* FORMULÁRIO */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {/*
           <div className="space-y-4">
             <div>
               <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">E-mail</label>
@@ -133,6 +137,31 @@ export default function LoginPage() {
                 "Entrar no Sistema"
               )}
             </button>
+          </div>
+          */}
+          <div className="space-y-4 mt-8">
+
+            <Link
+              href="/sites/clinica-teste/login"
+              className="block w-full text-center py-4 rounded-xl bg-slate-900 text-white font-bold hover:bg-blue-600 transition"
+            >
+              Entrar na Clínica de Psicologia (Demo)
+            </Link>
+
+            <Link
+              href="/sites/advocacia-teste/login"
+              className="block w-full text-center py-4 rounded-xl bg-slate-900 text-white font-bold hover:bg-blue-600 transition"
+            >
+              Entrar na Advocacia (Demo)
+            </Link>
+
+            <Link
+              href="/sites/personal-teste/login"
+              className="block w-full text-center py-4 rounded-xl bg-slate-900 text-white font-bold hover:bg-blue-600 transition"
+            >
+              Entrar no Personal Trainer (Demo)
+            </Link>
+
           </div>
         </form>
 

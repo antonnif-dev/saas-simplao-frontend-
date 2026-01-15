@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from "next/server";
 
 export const config = {
@@ -33,13 +32,5 @@ export default function middleware(req: NextRequest) {
     const tenant = parts[0];
     const targetPath = `/sites/${tenant}${pathname}`;
     return NextResponse.rewrite(new URL(targetPath, req.url));
-  }
-
-  if (domain.endsWith(".vercel.app") && domain.split(".").length === 3) {
-    const tenant = req.cookies.get("tenant")?.value;
-    if (tenant) {
-      const targetPath = `/sites/${tenant}${pathname}`;
-      return NextResponse.rewrite(new URL(targetPath, req.url));
-    }
   }
 }
