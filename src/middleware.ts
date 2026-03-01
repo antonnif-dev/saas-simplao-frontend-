@@ -34,12 +34,29 @@ export default function middleware(req: NextRequest) {
     }
     */
 
-  if (pathname.startsWith("/sites/")) return NextResponse.next();
+  if (domain.endsWith(".vercel.app") && domain.split(".").length === 3) {
+    // ✅ raiz: mostrar seletor
+    if (pathname === "/") return NextResponse.next();
 
-  // ✅ Em localhost, mantém o comportamento normal
-  if (domain === "localhost" || domain === "www.localhost") return NextResponse.next();
+    // ✅ demo por path: rotas raiz viram /sites/{tenant}/...
+    const tenant = req.cookies.get("tenant")?.value;
+    if (tenant) {
+      const targetPath = `/sites/${tenant}${pathname}`;
+      return NextResponse.rewrite(new URL(targetPath, req.url));
+    }
 
-  // ✅ Se for subdomínio no futuro, aí sim você reescreve (mantém sua lógica)
+    return NextResponse.next();
+  }
+
+  if (pathname.startsWith("/sites/")) {
+    return NextResponse.next();
+  }
+
+  // acesso local direto
+  if (domain === "localhost" || domain === "www.localhost") {
+    return NextResponse.next();
+  }
+
   if (domain.endsWith(".localhost")) {
     const tenant = domain.replace(".localhost", "");
     const targetPath = `/sites/${tenant}${pathname}`;
@@ -53,7 +70,6 @@ export default function middleware(req: NextRequest) {
     return NextResponse.rewrite(new URL(targetPath, req.url));
   }
 
-  // ✅ domínio raiz (vercel) → deixa seguir normal
   return NextResponse.next();
 
 }
