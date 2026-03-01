@@ -50,12 +50,25 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       try {
         // Tenant
         if (site) {
-          const tenantSnap = await getDoc(doc(db, "tenants", site as string));
-          if (tenantSnap.exists()) {
-            setTenantData(tenantSnap.data());
+          const tenantRef = doc(db, "tenants", site as string);
+          const tenantSnap = await getDoc(tenantRef);
+
+          if (!tenantSnap.exists()) {
+            window.location.href = "/";
+            return;
           }
 
-          // ✅ Layout salvo pelo admin
+          const tenant = tenantSnap.data();
+
+          // 🔒 validar status
+          if (tenant.status !== "ativo") {
+            window.location.href = "/";
+            return;
+          }
+
+          setTenantData(tenant);
+
+          // Layout
           const layoutSnap = await getDoc(doc(db, "layouts", site as string));
           if (layoutSnap.exists()) {
             const data = layoutSnap.data();
@@ -71,6 +84,11 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
           unsubscribeUser = onSnapshot(doc(db, "users", user.uid), (docSnap) => {
             if (docSnap.exists()) {
               const data = docSnap.data();
+              if (data.tenantId !== site) {
+                signOut(auth);
+                window.location.href = `/sites/${site}/login`;
+                return;
+              }
               setRole(data.role || "paciente");
               setUserName(data.nomeCompleto || "Usuário");
               setUserPhoto(data.photoURL || null);
@@ -171,7 +189,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
 
   const handleLogout = async () => {
     await signOut(auth);
-    window.location.href = `/login`;
+    window.location.href = `/sites/${site}/login`;
   };
 
   if (loadingRole && !authLoading) return <div className="h-screen flex items-center justify-center">Validando acesso...</div>;

@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from "next/server";
 
 export const config = {
@@ -13,33 +12,43 @@ export default function middleware(req: NextRequest) {
   const domain = hostname.split(":")[0];
   const pathname = url.pathname;
 
+  // Já está dentro de /sites
   if (pathname.startsWith("/sites/")) {
     return NextResponse.next();
   }
 
-  // acesso local direto
+  // acesso local puro
   if (domain === "localhost" || domain === "www.localhost") {
     return NextResponse.next();
   }
 
+  // suporte a clinica.localhost
   if (domain.endsWith(".localhost")) {
     const tenant = domain.replace(".localhost", "");
-    const targetPath = `/sites/${tenant}${pathname}`;
-    return NextResponse.rewrite(new URL(targetPath, req.url));
+    return NextResponse.rewrite(
+      new URL(`/sites/${tenant}${pathname}`, req.url)
+    );
   }
 
-  const parts = domain.split(".");
-  if (parts.length >= 3) {
-    const tenant = parts[0];
-    const targetPath = `/sites/${tenant}${pathname}`;
-    return NextResponse.rewrite(new URL(targetPath, req.url));
-  }
+  // 🔥 CASO VERCEL PREFIXADO
+  if (domain.endsWith(".vercel.app")) {
+    // exemplo:
+    // clinica-saas-simplao-frontend.vercel.app
 
-  if (domain.endsWith(".vercel.app") && domain.split(".").length === 3) {
-    const tenant = req.cookies.get("tenant")?.value;
-    if (tenant) {
-      const targetPath = `/sites/${tenant}${pathname}`;
-      return NextResponse.rewrite(new URL(targetPath, req.url));
+    const base = "saas-simplao-frontend.vercel.app";
+
+    if (domain === base) {
+      return NextResponse.next();
+    }
+
+    if (domain.endsWith(base)) {
+      const tenant = domain.replace(`-${base}`, "");
+
+      return NextResponse.rewrite(
+        new URL(`/sites/${tenant}${pathname}`, req.url)
+      );
     }
   }
+
+  return NextResponse.next();
 }

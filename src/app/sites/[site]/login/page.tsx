@@ -12,6 +12,7 @@ export default function TenantLoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [clinicName, setClinicName] = useState<string>("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const { site } = useParams();
   const router = useRouter();
@@ -102,16 +103,34 @@ export default function TenantLoginPage() {
               />
             </div>
 
-            <div>
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Senha</label>
+            <div className="relative">
+              <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">
+                Senha
+              </label>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 required
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
+                aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                className="w-full p-4 pr-12 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(prev => !prev)}
+                className="absolute right-4 top[42px] text-slate-400 hover:text-slate-700 transition"
+              >
+                {showPassword ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9-7-9-7a16.77 16.77 0 013.06-3.79M6.88 6.88A9.956 9.956 0 0112 5c5 0 9 7 9 7a16.77 16.77 0 01-4.11 4.88M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 6L3 3" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 0s-4 7-9 7-9-7-9-7 4-7 9-7 9 7 9 7z" />
+                  </svg>
+                )}
+              </button>
             </div>
           </div>
 

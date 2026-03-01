@@ -1,8 +1,11 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { onAuthStateChanged, signOut, User } from "firebase/auth";
+import { auth, db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const AuthContext = createContext<{ user: User | null; loading: boolean }>({
   user: null,
@@ -12,15 +15,55 @@ const AuthContext = createContext<{ user: User | null; loading: boolean }>({
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
-    // Escuta globalmente o estado de login
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser);
-      setLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!firebaseUser) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      const host = window.location.host;
+      const tenantId =
+        host.includes(".") && !host.includes("localhost")
+          ? host.split(".")[0]
+          : "localhost";
+
+      try {
+        const userSnap = await getDoc(
+          doc(db, `tenants/${tenantId}/users/${firebaseUser.uid}`)
+        );
+
+        if (!userSnap.exists()) {
+          console.warn("Usuário não encontrado no tenant atual.");
+          await signOut(auth);
+          router.push("/login");
+          return;
+        }
+
+        const userData = userSnap.data();
+        if (userData?.tenantId !== tenantId) {
+          console.warn("Usuário pertence a outro tenant.");
+          await signOut(auth);
+          router.push("/login");
+          return;
+        }
+
+        setUser(firebaseUser);
+      } catch (err) {
+        console.error("Erro ao validar tenantId:", err);
+        await signOut(auth);
+        router.push("/login");
+      } finally {
+        setLoading(false);
+      }
     });
+
     return () => unsubscribe();
-  }, []);
+  }, [pathname]);
 
   return (
     <AuthContext.Provider value={{ user, loading }}>
