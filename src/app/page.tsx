@@ -9,8 +9,8 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const params = useParams();
-  const site = typeof params.site === "string" ? params.site : undefined;
+  //const params = useParams();
+  //const site = typeof params.site === "string" ? params.site : undefined;
 
   useEffect(() => {
     // Remova a referência a 'site' aqui dentro
