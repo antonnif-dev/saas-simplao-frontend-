@@ -17,6 +17,10 @@ export default function TenantLoginPage() {
   const getTenantFromHost = () => {
     const host = window.location.hostname;
 
+    if (host.includes("localhost")) {
+      return "clinica-teste";
+    }
+
     const subdomain = host.replace(".vercel.app", "");
 
     return subdomain.replace("-saas-simplao-frontend", "");
