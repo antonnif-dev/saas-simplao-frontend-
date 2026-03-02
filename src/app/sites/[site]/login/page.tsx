@@ -13,9 +13,40 @@ export default function TenantLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [clinicName, setClinicName] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
-  const params = useParams();
-  const site = typeof params.site === "string" ? params.site : undefined;
+
+  const getTenantFromHost = () => {
+    const host = window.location.hostname;
+
+    if (host.includes("localhost")) {
+      return host.split(".")[0];
+    }
+
+    return host.split("-")[0];
+  };
+
+  const site = getTenantFromHost();
   const router = useRouter();
+/*
+  useEffect(() => {
+    async function resolveTenant() {
+      const host = window.location.hostname;
+
+      const q = query(
+        collection(db, "tenants"),
+        where("customDomain", "==", host)
+      );
+
+      const snap = await getDocs(q);
+
+      if (!snap.empty) {
+        const tenantDoc = snap.docs[0];
+        setResolvedTenantId(tenantDoc.id);
+      }
+    }
+
+    resolveTenant();
+  }, []);
+  */
 
   useEffect(() => {
     setPersistence(auth, browserLocalPersistence);
