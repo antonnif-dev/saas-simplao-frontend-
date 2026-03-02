@@ -17,7 +17,8 @@ import {
 import Link from "next/link";
 
 export default function CadastroPage() {
-  const { site } = useParams();
+  const params = useParams();
+  const site = typeof params.site === "string" ? params.site : undefined;
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -60,7 +61,7 @@ export default function CadastroPage() {
       const newUser = userCredential.user;
 
       // 3️⃣ Cria perfil do usuário
-      await setDoc(doc(db, "users", newUser.uid), {
+      await setDoc(doc(db, "tenants", site, "users", newUser.uid), {
         nomeCompleto: formData.nome,
         email: formData.email,
         tenantId: site,

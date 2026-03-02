@@ -6,7 +6,7 @@ export const config = {
   ],
 };
 
-export default function middleware(req: NextRequest) {
+export default function proxy(req: NextRequest) {
   const url = req.nextUrl;
   const hostname = req.headers.get("host") || "";
   const domain = hostname.split(":")[0];

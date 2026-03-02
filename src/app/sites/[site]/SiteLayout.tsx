@@ -14,7 +14,8 @@ import { verticals } from "@/config/verticals";
 //import { verticalExtrasMap } from "@/config/verticalExtras";
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
-  const { site } = useParams();
+  const params = useParams();
+  const site = typeof params.site === "string" ? params.site : undefined;
   const pathname = usePathname();
   const { user, loading: authLoading } = useAuth();
 
@@ -49,7 +50,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
     async function initData() {
       try {
         // Tenant
-        if (site) {
+        if (site && user?.uid) {
           const tenantRef = doc(db, "tenants", site as string);
           const tenantSnap = await getDoc(tenantRef);
 
@@ -69,7 +70,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
           setTenantData(tenant);
 
           // Layout
-          const layoutSnap = await getDoc(doc(db, "layouts", site as string));
+          const layoutSnap = await getDoc(doc(db, "tenants", site as string, "layouts", site as string));
           if (layoutSnap.exists()) {
             const data = layoutSnap.data();
             setLayoutInfo({
@@ -80,8 +81,8 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
         }
 
         // Usuário (tempo real)
-        if (user?.uid) {
-          unsubscribeUser = onSnapshot(doc(db, "users", user.uid), (docSnap) => {
+        if (site && user?.uid) {
+          unsubscribeUser = onSnapshot(doc(db, "tenants", site, "users", user.uid), (docSnap) => {
             if (docSnap.exists()) {
               const data = docSnap.data();
               if (data.tenantId !== site) {

@@ -11,7 +11,8 @@ import SiteLayout from "../SiteLayout";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function AgendaPage() {
-  const { site } = useParams();
+  const params = useParams();
+  const site = typeof params.site === "string" ? params.site : undefined;
   const { user, loading: authLoading } = useAuth();
 
   const [consultas, setConsultas] = useState<any[]>([]);
@@ -58,7 +59,7 @@ export default function AgendaPage() {
     try {
       setLoading(true);
 
-      const userSnap = await getDoc(doc(db, "users", user.uid));
+      const userSnap = await getDoc(doc(db, "tenants", site, "users", user.uid));
       let userRole = "paciente";
 
       if (userSnap.exists()) {

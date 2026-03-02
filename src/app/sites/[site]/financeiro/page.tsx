@@ -13,9 +13,9 @@ import { maskCurrency, parseCurrencyToNumber } from "@/lib/utils";
 import { getDoc } from "firebase/firestore";
 
 export default function FinanceiroPage() {
-  const { site } = useParams();
+  const params = useParams();
+  const site = typeof params.site === "string" ? params.site : undefined;
   const { user } = useAuth();
-
   const [transacoes, setTransacoes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -87,7 +87,7 @@ export default function FinanceiroPage() {
   useEffect(() => {
     async function loadData() {
       if (!site || !user?.uid) return;
-      const userSnap = await getDoc(doc(db, "users", user.uid));
+      const userSnap = await getDoc(doc(db, "tenants", site, "users", user.uid));
       if (userSnap.exists()) {
         setRole(userSnap.data().role);
       }

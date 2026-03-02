@@ -26,16 +26,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const host = window.location.host;
-      const tenantId =
-        host.includes(".") && !host.includes("localhost")
-          ? host.split(".")[0]
-          : "localhost";
+      const segments = pathname.split("/");
+      const tenantId = segments[2];
+
+      if (!tenantId) {
+        setUser(firebaseUser);
+        setLoading(false);
+        return;
+      }
 
       try {
-        const userSnap = await getDoc(
-          doc(db, `tenants/${tenantId}/users/${firebaseUser.uid}`)
-        );
+        const userRef = doc(db, "tenants", tenantId, "users", firebaseUser.uid);
+        const userSnap = await getDoc(userRef);
 
         if (!userSnap.exists()) {
           console.warn("Usuário não encontrado no tenant atual.");

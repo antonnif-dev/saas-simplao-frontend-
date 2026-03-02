@@ -9,6 +9,8 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const params = useParams();
+  const site = typeof params.site === "string" ? params.site : undefined;
 
   useEffect(() => {
     // Remova a referência a 'site' aqui dentro
@@ -20,34 +22,13 @@ export default function LoginPage() {
     return () => unsubscribe();
   }, []);
 
-  /* Somente localhost:3000 funcionando
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
-
-      if (userDoc.exists()) {
-        const tenantId = userDoc.data().tenantId;
-        // Redireciona para o subdomínio
-        window.location.href = `http://${tenantId}.localhost:3000`;
-      }
-    } catch (error) {
-      alert("Erro ao entrar. Verifique suas credenciais.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-*/
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
+      const userDoc = await getDoc(doc(db, "tenants", site, "users", userCredential.user.uid));
 
       if (userDoc.exists()) {
         const tenantId = userDoc.data().tenantId;

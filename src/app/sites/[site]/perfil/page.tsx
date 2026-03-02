@@ -16,7 +16,8 @@ const maskPhone = (v: string) => {
 };
 
 export default function PerfilPage() {
-  const { site } = useParams();
+  const params = useParams();
+  const site = typeof params.site === "string" ? params.site : undefined;
   const { user, loading: authLoading } = useAuth();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -40,8 +41,8 @@ export default function PerfilPage() {
   });
 
   const fetchUserProfile = async () => {
-    if (!user) return;
-    const docSnap = await getDoc(doc(db, "users", user.uid));
+    if (!site || !user?.uid) return;
+    const docSnap = await getDoc(doc(db, "tenants", site, "users", user.uid));
     if (docSnap.exists()) {
       const data = docSnap.data();
       setFormData({
@@ -57,7 +58,7 @@ export default function PerfilPage() {
   const fetchLayout = async () => {
     if (!site) return;
 
-    const snap = await getDoc(doc(db, "layouts", String(site)));
+    const snap = await getDoc(doc(db, "tenants", site as string, "layouts", site as string));
     if (!snap.exists()) return;
 
     const data = snap.data();
@@ -66,18 +67,18 @@ export default function PerfilPage() {
   };
 
   useEffect(() => {
-    if (!authLoading && user) {
+    if (!authLoading && user && site) {
       fetchUserProfile();
       fetchLayout();
 
       // 🔴 BUSCA ROLE DO USUÁRIO
-      getDoc(doc(db, "users", user.uid)).then(snap => {
+      getDoc(doc(db, "tenants", site, "users", user.uid)).then(snap => {
         if (snap.exists()) {
           setRole(snap.data().role || null);
         }
       });
     }
-  }, [authLoading, user]);
+  }, [authLoading, user, site]);
 
   // Função de Upload para o Cloudinary
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,7 +104,7 @@ export default function PerfilPage() {
         setFormData((prev) => ({ ...prev, photoURL: newUrl }));
 
         if (user) {
-          await updateDoc(doc(db, "users", user.uid), { photoURL: newUrl });
+          await updateDoc(doc(db, "tenants", site, "users", user.uid), { photoURL: newUrl });
         }
       }
     } catch (error) {
@@ -133,7 +134,7 @@ export default function PerfilPage() {
   const handleSaveLayout = async () => {
     if (!site) return;
 
-    await setDoc(doc(db, "layouts", String(site)), {
+    await setDoc(doc(db, "tenants", site as string, "layouts", site as string), {
       image: layoutImage || null,
       text: layoutText,
       updatedAt: new Date()
@@ -146,7 +147,7 @@ export default function PerfilPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      await updateDoc(doc(db, "users", user!.uid), {
+      await updateDoc(doc(db, "tenants", site, "users", user.uid), {
         ...formData,
         updatedAt: new Date()
       });
@@ -336,7 +337,7 @@ export default function PerfilPage() {
                 onClick={async () => {
                   if (!site) return;
 
-                  await setDoc(doc(db, "layouts", String(site)), {
+                  await setDoc(doc(db, "tenants", site, "layouts", site), {
                     image: layoutImage || null,
                     text: layoutText,
                     updatedAt: new Date()

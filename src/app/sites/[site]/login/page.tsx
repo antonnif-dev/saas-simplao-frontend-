@@ -13,8 +13,8 @@ export default function TenantLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [clinicName, setClinicName] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
-
-  const { site } = useParams();
+  const params = useParams();
+  const site = typeof params.site === "string" ? params.site : undefined;
   const router = useRouter();
 
   useEffect(() => {
@@ -44,8 +44,17 @@ export default function TenantLoginPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
+      if (!site) {
+        alert("Tenant inválido.");
+        await auth.signOut();
+        return;
+      }
+      console.log("SITE:", site);
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
+      console.log("UID:", userCredential.user.uid);
+      console.log("SITE:", site);
+      const userRef = doc(db, "tenants", site, "users", userCredential.user.uid);
+      const userDoc = await getDoc(userRef);
 
       if (!userDoc.exists()) {
         alert("Perfil de usuário não configurado.");
@@ -113,7 +122,6 @@ export default function TenantLoginPage() {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••"
-                aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                 className="w-full p-4 pr-12 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
               />
               <button

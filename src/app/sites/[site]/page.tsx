@@ -9,7 +9,8 @@ import SiteLayout from "./SiteLayout";
 import Image from "next/image";
 
 export default function DashboardPage() {
-  const { site } = useParams();
+  const params = useParams();
+  const site = typeof params.site === "string" ? params.site : undefined;
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const [verticalId, setVerticalId] = useState<string | null>(null);
@@ -29,23 +30,21 @@ export default function DashboardPage() {
     const fetchDashboardData = async () => {
       try {
         setDataLoading(true);
-        const userRef = doc(db, "users", user.uid);
+        const userRef = doc(db, "tenants", site, "users", user.uid);
         const userSnap = await getDoc(userRef);
 
         if (userSnap.exists()) {
           const data = userSnap.data();
           setUserData(data);
 
-          // Lógica para Psicólogo (Admin)
           if (data.role === "admin") {
-            const qPacientes = query(collection(db, "tenants", site, "pacientes"), where("tenantId", "==", site));
+            const qPacientes = collection(db, "tenants", site, "pacientes");
             const snapPacientes = await getDocs(qPacientes);
             setStats({ pacientes: snapPacientes.size });
+            console.log("Lendo:", "tenants", site, "pacientes");
           }
 
-          // Lógica para Paciente (Cliente) - BUSCA CONSULTA AGENDADA
           else {
-            // CORREÇÃO AQUI: Agora buscamos pelo UID, igual na Agenda
             const qConsultas = query(
               collection(db, "tenants", site, "consultas"),
               where("tenantId", "==", site),
@@ -55,16 +54,13 @@ export default function DashboardPage() {
             const snapConsultas = await getDocs(qConsultas);
 
             if (!snapConsultas.empty) {
-              // Ordena manualmente pela data mais próxima se houver mais de uma
               const lista = snapConsultas.docs.map(d => d.data());
-              // Converte string de data para objeto Date e ordena
               const ordenada = lista.sort((a, b) => {
                 const dataA = new Date(`${a.data}T${a.horario}`);
                 const dataB = new Date(`${b.data}T${b.horario}`);
                 return dataA.getTime() - dataB.getTime();
               });
 
-              // Pega a primeira que seja futura (opcional, mas boa prática) ou apenas a primeira da lista
               setProximaConsulta(ordenada[0]);
             }
           }
