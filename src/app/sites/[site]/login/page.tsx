@@ -17,36 +17,13 @@ export default function TenantLoginPage() {
   const getTenantFromHost = () => {
     const host = window.location.hostname;
 
-    if (host.includes("localhost")) {
-      return host.split(".")[0];
-    }
+    const subdomain = host.replace(".vercel.app", "");
 
-    return host.split("-")[0];
+    return subdomain.replace("-saas-simplao-frontend", "");
   };
 
   const site = getTenantFromHost();
   const router = useRouter();
-/*
-  useEffect(() => {
-    async function resolveTenant() {
-      const host = window.location.hostname;
-
-      const q = query(
-        collection(db, "tenants"),
-        where("customDomain", "==", host)
-      );
-
-      const snap = await getDocs(q);
-
-      if (!snap.empty) {
-        const tenantDoc = snap.docs[0];
-        setResolvedTenantId(tenantDoc.id);
-      }
-    }
-
-    resolveTenant();
-  }, []);
-  */
 
   useEffect(() => {
     setPersistence(auth, browserLocalPersistence);
