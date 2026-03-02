@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db } from "@/lib/firebase";
 import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link"; // Importado para navegação interna
 
@@ -14,16 +14,21 @@ export default function TenantLoginPage() {
   const [clinicName, setClinicName] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const getTenantFromHost = () => {
+  const getTenantFromHost = async () => {
     const host = window.location.hostname;
 
-    if (host.includes("localhost")) {
-      return "clinica-teste";
+    const q = query(
+      collection(db, "tenants"),
+      where("customDomain", "==", host)
+    );
+
+    const snap = await getDocs(q);
+
+    if (!snap.empty) {
+      return snap.docs[0].id;
     }
 
-    const subdomain = host.replace(".vercel.app", "");
-
-    return subdomain.replace("-saas-simplao-frontend", "");
+    return null;
   };
 
   const site = getTenantFromHost();
@@ -31,6 +36,15 @@ export default function TenantLoginPage() {
 
   useEffect(() => {
     setPersistence(auth, browserLocalPersistence);
+  }, []);
+
+  useEffect(() => {
+    async function resolveTenant() {
+      const resolvedSite = await getTenantFromHost();
+      setSite(resolvedSite);
+    }
+
+    resolveTenant();
   }, []);
 
   useEffect(() => {
