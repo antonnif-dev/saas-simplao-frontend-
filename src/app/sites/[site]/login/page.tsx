@@ -49,7 +49,6 @@ export default function TenantLoginPage() {
 
   useEffect(() => {
     if (!site) return;
-
     async function fetchClinicData() {
       try {
         const docRef = doc(db, "tenants", site);
@@ -70,22 +69,19 @@ export default function TenantLoginPage() {
   }, [site]);
 
   const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     if (!site) {
       alert("Tenant inválido.");
       return;
     }
-    e.preventDefault();
+
     setIsLoading(true);
-    try {
-      if (!site) {
-        alert("Tenant inválido.");
-        await auth.signOut();
-        return;
-      }
+
+    try {      
       console.log("SITE:", site);
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log("UID:", userCredential.user.uid);
-      console.log("SITE:", site);
       const userRef = doc(db, "tenants", site, "users", userCredential.user.uid);
       const userDoc = await getDoc(userRef);
 
@@ -105,7 +101,9 @@ export default function TenantLoginPage() {
       }
 
       const isLocal = window.location.hostname.includes("localhost");
-      document.cookie = `tenant=${tenantId}; Path=/; SameSite=Lax${isLocal ? "" : "; Secure"}`;
+      //document.cookie = `tenant=${tenantId}; Path=/; SameSite=Lax${isLocal ? "" : "; Secure"}`;
+      //opção sem secure
+      document.cookie = `tenant=${tenantId}; Path=/; SameSite=Lax`;
 
       window.location.href = `/sites/${tenantId}`;
     } catch (error) {
