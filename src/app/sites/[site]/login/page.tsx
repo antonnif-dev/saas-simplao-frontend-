@@ -78,7 +78,7 @@ export default function TenantLoginPage() {
 
     setIsLoading(true);
 
-    try {      
+    try {
       console.log("SITE:", site);
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log("UID:", userCredential.user.uid);
@@ -99,13 +99,21 @@ export default function TenantLoginPage() {
         await auth.signOut();
         return;
       }
-
+      /*
       const isLocal = window.location.hostname.includes("localhost");
-      //document.cookie = `tenant=${tenantId}; Path=/; SameSite=Lax${isLocal ? "" : "; Secure"}`;
-      //opção sem secure
-      document.cookie = `tenant=${tenantId}; Path=/; SameSite=Lax`;
+      document.cookie = `tenant=${tenantId}; Path=/; SameSite=Lax${isLocal ? "" : "; Secure"}`;
 
       window.location.href = `/sites/${tenantId}`;
+      */
+
+      await fetch("/api/set-tenant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tenantId }),
+      });
+
+      window.location.href = `/sites/${tenantId}`;
+
     } catch (error) {
       alert("E-mail ou senha incorretos.");
     } finally {
