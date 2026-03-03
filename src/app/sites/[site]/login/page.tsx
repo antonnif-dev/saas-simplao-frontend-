@@ -13,6 +13,7 @@ export default function TenantLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [clinicName, setClinicName] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
+  const [site, setSite] = useState<string | null>(null);
 
   const getTenantFromHost = async () => {
     const host = window.location.hostname;
@@ -31,7 +32,6 @@ export default function TenantLoginPage() {
     return null;
   };
 
-  const site = getTenantFromHost();
   const router = useRouter();
 
   useEffect(() => {
@@ -48,25 +48,32 @@ export default function TenantLoginPage() {
   }, []);
 
   useEffect(() => {
+    if (!site) return;
+
     async function fetchClinicData() {
-      if (!site) return;
       try {
-        const docRef = doc(db, "tenants", site as string);
+        const docRef = doc(db, "tenants", site);
         const docSnap = await getDoc(docRef);
+
         if (docSnap.exists()) {
           const data = docSnap.data();
-          setClinicName(data.name || data.nomeClinica || site.toString());
+          setClinicName(data.name || data.nomeClinica || site);
         } else {
-          setClinicName(site.toString().replace(/-/g, ' '));
+          setClinicName(site.replace(/-/g, " "));
         }
       } catch (error) {
         console.error("Erro ao buscar dados da clínica:", error);
       }
     }
+
     fetchClinicData();
   }, [site]);
 
   const handleSubmit = async (e: React.FormEvent) => {
+    if (!site) {
+      alert("Tenant inválido.");
+      return;
+    }
     e.preventDefault();
     setIsLoading(true);
     try {
