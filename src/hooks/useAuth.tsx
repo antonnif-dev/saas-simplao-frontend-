@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!userSnap.exists()) {
           console.warn("Usuário não encontrado no tenant atual.");
           await signOut(auth);
-          router.push("/login");
+          router.push(`/sites/${tenantId}/login`);
           return;
         }
 
@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (userData?.tenantId !== tenantId) {
           console.warn("Usuário pertence a outro tenant.");
           await signOut(auth);
-          router.push("/login");
+          router.push(`/sites/${tenantId}/login`);
           return;
         }
 
@@ -58,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch (err) {
         console.error("Erro ao validar tenantId:", err);
         await signOut(auth);
-        router.push("/login");
+        router.push(`/sites/${tenantId}/login`);
       } finally {
         setLoading(false);
       }
