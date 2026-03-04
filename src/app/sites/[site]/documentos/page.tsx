@@ -14,7 +14,6 @@ export default function DocumentosPage() {
   const [docs, setDocs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Estado para controlar qual documento está aberto no modal
   const [viewingDoc, setViewingDoc] = useState<any>(null);
 
   const fetchDocumentos = async () => {
@@ -43,12 +42,9 @@ export default function DocumentosPage() {
     if (!authLoading && user) fetchDocumentos();
   }, [authLoading, user, site]);
 
-  // --- FUNÇÃO ÚNICA DE RENDERIZAÇÃO (Leitor Universal) ---
   const renderDocContent = (url: string) => {
-    // Limpa a URL para garantir que pegamos a extensão correta
     const cleanUrl = url.split('?')[0].toLowerCase();
 
-    // 1. Verifica se é PDF
     if (cleanUrl.endsWith('.pdf')) {
       return (
         <object
@@ -71,8 +67,6 @@ export default function DocumentosPage() {
       );
     }
 
-    // 2. Verifica se é Arquivo Office (Word, Excel, PowerPoint)
-    // Usa o Google Docs Viewer para exibir sem precisar baixar
     if (cleanUrl.match(/\.(doc|docx|xls|xlsx|ppt|pptx)$/)) {
       const googleDocsUrl = `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
       return (
@@ -85,7 +79,6 @@ export default function DocumentosPage() {
       );
     }
 
-    // 3. Padrão: Imagem
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
@@ -130,7 +123,6 @@ export default function DocumentosPage() {
                   </div>
                 </div>
 
-                {/* Botão para abrir o Modal */}
                 <button
                   onClick={() => setViewingDoc(doc)}
                   className="bg-slate-100 text-slate-600 px-4 py-2 rounded-xl text-xs font-black hover:bg-slate-900 hover:text-white transition-all"
@@ -142,7 +134,6 @@ export default function DocumentosPage() {
           )}
         </div>
 
-        {/* Informação de Segurança */}
         <div className="mt-12 p-6 bg-blue-50 rounded-3xl border border-blue-100 flex gap-4 items-center">
           <span className="text-2xl">🛡️</span>
           <p className="text-xs text-blue-800 font-medium leading-relaxed">
@@ -151,12 +142,10 @@ export default function DocumentosPage() {
         </div>
       </div>
 
-      {/* MODAL DE VISUALIZAÇÃO */}
       {viewingDoc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/90 backdrop-blur-sm p-4">
           <div className="bg-white w-full max-w-5xl h-[90vh] rounded-3xl shadow-2xl flex flex-col relative overflow-hidden animate-in fade-in zoom-in duration-200">
 
-            {/* Cabeçalho do Modal */}
             <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-white z-10 shadow-sm">
               <div className="flex items-center gap-2 overflow-hidden">
                 <span className="text-xl">📄</span>
@@ -183,7 +172,6 @@ export default function DocumentosPage() {
               </div>
             </div>
 
-            {/* Área de Conteúdo */}
             <div className="flex-1 bg-slate-200 overflow-hidden relative w-full">
               {renderDocContent(viewingDoc.url)}
             </div>
